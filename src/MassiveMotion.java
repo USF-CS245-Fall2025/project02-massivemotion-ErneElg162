@@ -2,66 +2,197 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
 
-public class MassiveMotion extends JPanel implements ActionListener {
-
+public class MassiveMotion extends JPanel implements ActionListener
+{
     protected Timer tm;
+    protected Properties config;
 
-    // TODO: Consider removing the next two lines (coordinates for two balls)
-    protected int x1, y1;
-    protected int x2, y2;
+    private static String listType;
+    public static int window_size_x;
+    public static int window_size_y;
 
+    private static double gen_x;
+    private static double gen_y;
+    private static int body_size;
+    private static double body_mass;
+    private static int body_velocity;
 
-    // public MassiveMotion(String propfile) {
-    public MassiveMotion() {
-        // TODO: insert your code to read from configuration file here.
+    private static int star_position_x;
+    private static int star_position_y;
+    private static int star_size;
+    private static double star_mass;
+    private static int star_velocity_x;
+    private static int star_velocity_y;
 
-        tm = new Timer(75, this); // TODO: Replace the first argument with delay with value from config file.
+    private static List<CelestialBody> LIST;
 
-        // TODO: Consider removing the next two lines (coordinates) for random starting locations.
-        x1 = 100; y1 = 50;
-        x2 = 200; y2 = 400;
+    /** Reads from property file and sets values of properties
+     * @param propfile Name of property file
+     */
+    public MassiveMotion(String propfile) throws IOException
+    {
+        config = new Properties();
+        config.load(new FileReader(propfile));
+
+        tm = new Timer(Integer.parseInt((String) config.get("timer_delay")), this);
+
+        listType = (String) config.get("list");
+
+        window_size_x = Integer.parseInt((String) config.get("window_size_x"));
+        window_size_y = Integer.parseInt((String) config.get("window_size_y"));
+
+        gen_x = Double.parseDouble((String) config.get("gen_x"));
+        gen_y = Double.parseDouble((String) config.get("gen_y"));
+        body_size = Integer.parseInt((String) config.get("body_size"));
+        body_mass = Double.parseDouble((String) config.get("body_mass"));
+        body_velocity = Integer.parseInt((String) config.get("body_velocity"));
+
+        star_position_x = Integer.parseInt((String) config.get("star_position_x"));
+        star_position_y = Integer.parseInt((String) config.get("star_position_y"));
+        star_size = Integer.parseInt((String) config.get("star_size"));
+        star_mass = Double.parseDouble((String) config.get("star_mass"));
+        star_velocity_x = Integer.parseInt((String) config.get("star_velocity_x"));
+        star_velocity_y = Integer.parseInt((String) config.get("star_velocity_y"));
     }
 
-    public void paintComponent(Graphics g) {
+    /**
+     * Paints celestial bodies
+     * @param g the Graphics object
+     */
+    public void paintComponent(Graphics g)
+    {
         super.paintComponent(g); // Probably best you leave this as is.
 
-        // TODO: Paint each ball. Here's how to paint two balls, one after the other:
-        g.setColor(Color.BLUE);
-        g.fillOval(x1, y1, 20, 20);
+        for(int i = 0; i < LIST.size(); i++)
+        {
+            CelestialBody cb = LIST.get(i);
 
-        g.setColor(Color.RED);
-        g.fillOval(x2, y2, 20, 20);
+            g.setColor(cb.getColor());
+            g.fillOval(cb.getPosX(), cb.getPosY(), cb.getSize(), cb.getSize());
+        }
 
         // Recommend you leave the next line as is
         tm.start();
     }
 
 
+    /**
+     * Updates celestial bodies and spawns new ones
+     * @param actionEvent the event to be processed
+     */
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         // TODO: Change the location of each ball. Here's an example of them moving across the screen:
         //       ... but to be clear, you should change this.
-        x1 += 10;
-        x2 -= 15;
-        // These two "if" statements keep the balls on the screen in case they go off one side.
-        if (x1 > 640)
-            x1 = 0;
-        if (x2 < 0)
-            x2 = 640;
+
+        double randSpwn = Math.random();
+
+        //Generate new body
+        if(randSpwn < gen_x + gen_y)
+        {
+            int spdX = 0;
+            int spdY = 0;
+
+            //Generate non-zero speeds
+            while(spdX == 0 && spdY == 0)
+            {
+                spdX = (int) ((2 * Math.random() - 1) * body_velocity);
+                spdY = (int) ((2 * Math.random() - 1) * body_velocity);
+            }
+
+            int posX;
+            int posY;
+
+            //Generate along x-axis
+            if(randSpwn < gen_x)
+            {
+                posX = (int) (window_size_x * Math.random());
+                posY = window_size_y * (int) (2 * Math.random());
+            }
+
+            //Generate along y-axis
+            else
+            {
+                posX = window_size_x * (int) (2 * Math.random());
+                posY = (int) (window_size_y * Math.random());
+            }
+
+            CelestialBody cb = new CelestialBody(body_size, posX, posY, spdX, spdY);
+            LIST.add(cb);
+        }
+
+        //update celestial bodies
+        for(int i = 0; i < LIST.size(); i++)
+        {
+            if(LIST.get(i).update())
+            {
+                LIST.remove(i);
+                i--;
+            }
+        }
 
         // Keep this at the end of the function (no matter what you do above):
         repaint();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
+        if(args.length < 1)
+        {
+            throw new RuntimeException("ERROR: NO PROPERTY FILE FOUND!");
+        }
+
         System.out.println("Massive Motion starting...");
-        // MassiveMotion mm = new MassiveMotion(args[0]);
-        MassiveMotion mm = new MassiveMotion();
+
+        MassiveMotion mm;
+
+        try
+        {
+            mm = new MassiveMotion(args[0]);
+        }
+
+        catch (IOException e)
+        {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        //use correct list
+        if(listType.equals("arraylist"))
+        {
+            LIST = new ArrayList<>();
+        }
+
+        else if(listType.equals("single"))
+        {
+            LIST = new LinkedList<>();
+        }
+
+        else if(listType.equals("double"))
+        {
+            LIST = new DoublyLinkedList<>();
+        }
+
+        else if(listType.equals("dummyhead"))
+        {
+            LIST = new DummyHeadLinkedList<>();
+        }
+
+        else
+        {
+            throw new RuntimeException(listType + " IS AN INVALID LIST TYPE");
+        }
+
+        //add star to list
+        CelestialBody star = new CelestialBody(star_size, star_position_x, star_position_y, star_velocity_x, star_velocity_y, Color.RED);
+        LIST.add(star);
 
         JFrame jf = new JFrame();
         jf.setTitle("Massive Motion");
-        jf.setSize(640, 480); // TODO: Replace with the size from configuration!
+        jf.setSize(window_size_x, window_size_y);
         jf.add(mm);
         jf.setVisible(true);
         jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
