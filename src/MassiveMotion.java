@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Random;
 
 public class MassiveMotion extends JPanel implements ActionListener
 {
@@ -30,11 +31,15 @@ public class MassiveMotion extends JPanel implements ActionListener
 
     private static List<CelestialBody> LIST;
 
+    private final Random rand;
+
     /** Reads from property file and sets values of properties
      * @param propfile Name of property file
      */
     public MassiveMotion(String propfile) throws IOException
     {
+        rand = new Random();
+
         config = new Properties();
         config.load(new FileReader(propfile));
 
@@ -85,11 +90,9 @@ public class MassiveMotion extends JPanel implements ActionListener
      * @param actionEvent the event to be processed
      */
     @Override
-    public void actionPerformed(ActionEvent actionEvent) {
-        // TODO: Change the location of each ball. Here's an example of them moving across the screen:
-        //       ... but to be clear, you should change this.
-
-        double randSpwn = Math.random();
+    public void actionPerformed(ActionEvent actionEvent)
+    {
+        double randSpwn = rand.nextFloat();
 
         //Generate new body
         if(randSpwn < gen_x + gen_y)
@@ -100,8 +103,8 @@ public class MassiveMotion extends JPanel implements ActionListener
             //Generate non-zero speeds
             while(spdX == 0 && spdY == 0)
             {
-                spdX = (int) ((2 * Math.random() - 1) * body_velocity);
-                spdY = (int) ((2 * Math.random() - 1) * body_velocity);
+                spdX = rand.nextInt(-body_velocity, body_velocity + 1);
+                spdY = rand.nextInt(-body_velocity, body_velocity + 1);
             }
 
             int posX;
@@ -110,15 +113,15 @@ public class MassiveMotion extends JPanel implements ActionListener
             //Generate along x-axis
             if(randSpwn < gen_x)
             {
-                posX = (int) (window_size_x * Math.random());
-                posY = window_size_y * (int) (2 * Math.random());
+                posX = rand.nextInt(window_size_x);
+                posY = window_size_y * rand.nextInt(2);
             }
 
             //Generate along y-axis
             else
             {
-                posX = window_size_x * (int) (2 * Math.random());
-                posY = (int) (window_size_y * Math.random());
+                posX = window_size_x * rand.nextInt(2);
+                posY = rand.nextInt(window_size_y);
             }
 
             CelestialBody cb = new CelestialBody(body_size, posX, posY, spdX, spdY);

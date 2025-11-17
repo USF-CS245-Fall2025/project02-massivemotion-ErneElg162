@@ -38,8 +38,6 @@ public class CelestialBody
         this.color = color;
     }
 
-    //return true if out of bounds
-
     /**
      * Updates the position of the celestial object
      * @return true if it is out of bounds. false if it is in bounds

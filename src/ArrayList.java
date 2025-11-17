@@ -60,6 +60,11 @@ public class ArrayList<T> implements List<T>
         this.arr[this.size - 1] = null;
     }
 
+    /**
+     * Add element to list at given index
+     * @param index index to add element to
+     * @param element element to add
+     */
     @Override
     public void add(int index, T element)
     {
@@ -82,6 +87,11 @@ public class ArrayList<T> implements List<T>
         this.size++;
     }
 
+    /**
+     * Add element to end of list
+     * @param element element to add
+     * @return true if successful, false if not
+     */
     @Override
     public boolean add(T element)
     {
@@ -97,6 +107,11 @@ public class ArrayList<T> implements List<T>
         return true;
     }
 
+    /**
+     * Get the element at the given index
+     * @param index index to get value of
+     * @return value at list[index]
+     */
     @Override
     public T get(int index)
     {
@@ -108,6 +123,11 @@ public class ArrayList<T> implements List<T>
         return this.arr[index];
     }
 
+    /**
+     * Remove element at given index
+     * @param index index to remove
+     * @return value of element removed
+     */
     @Override
     public T remove(int index)
     {
@@ -127,6 +147,9 @@ public class ArrayList<T> implements List<T>
         return val;
     }
 
+    /**
+     * @return number of elements in list
+     */
     @Override
     public int size()
     {

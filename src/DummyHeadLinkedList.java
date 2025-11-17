@@ -1,4 +1,3 @@
-
 public class DummyHeadLinkedList<T> implements List<T>
 {
     /**
@@ -9,20 +8,27 @@ public class DummyHeadLinkedList<T> implements List<T>
     {
         T value;
         Node<T> next;
+
+        public Node(T value)
+        {
+            this.value = value;
+        }
     }
 
     private final Node<T> head;
-    private Node<T> tail;
-
     private int size;
 
     public DummyHeadLinkedList()
     {
-        this.head = new Node<>();
-        this.tail = this.head;
+        this.head = new Node<>(null);
         this.size = 0;
     }
 
+    /**
+     * Add element to list at given index
+     * @param index index to add element to
+     * @param element element to add
+     */
     @Override
     public void add(int index, T element)
     {
@@ -32,8 +38,7 @@ public class DummyHeadLinkedList<T> implements List<T>
             throw new IndexOutOfBoundsException();
         }
 
-        Node<T> node = new Node<>();
-        node.value = element;
+        Node<T> node = new Node<>(element);
 
         //find prev of node
         Node<T> cur = this.head;
@@ -47,30 +52,33 @@ public class DummyHeadLinkedList<T> implements List<T>
         node.next = cur.next;
         cur.next = node;
 
-        //new tail
-        if(node.next == null)
-        {
-            this.tail = node;
-        }
-
         this.size++;
     }
 
+    /**
+     * Add element to end of list
+     * @param element element to add
+     * @return true if successful, false if not
+     */
     @Override
     public boolean add(T element)
     {
-        Node<T> node = new Node<>();
-        node.value = element;
+        Node<T> node = new Node<>(element);
 
-        //add to end
-        this.tail.next = node;
-        this.tail = node;
+        //add to start
+        node.next = this.head.next;
+        this.head.next = node;
 
         this.size++;
 
         return true;
     }
 
+    /**
+     * Get the element at the given index
+     * @param index index to get value of
+     * @return value at list[index]
+     */
     @Override
     public T get(int index)
     {
@@ -91,6 +99,11 @@ public class DummyHeadLinkedList<T> implements List<T>
         return cur.value;
     }
 
+    /**
+     * Remove element at given index
+     * @param index index to remove
+     * @return value of element removed
+     */
     @Override
     public T remove(int index)
     {
@@ -110,22 +123,15 @@ public class DummyHeadLinkedList<T> implements List<T>
 
         T val = cur.next.value;
 
-        //remove tail
-        if(index == this.size - 1)
-        {
-            this.tail = cur;
-            this.tail.next = null;
-            this.size--;
-
-            return val;
-        }
-
         //remove node
         cur.next = cur.next.next;
         this.size--;
         return val;
     }
 
+    /**
+     * @return number of elements in list
+     */
     @Override
     public int size()
     {
